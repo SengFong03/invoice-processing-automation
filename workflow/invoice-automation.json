@@ -1,0 +1,1474 @@
+{
+  "name": "Invoice Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_FOLDER_ID",
+          "mode": "id"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2096,
+        -528
+      ],
+      "id": "17594f29-5469-45a6-a370-1cff856ebd64",
+      "name": "Google Drive Trigger",
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1648,
+        -656
+      ],
+      "id": "e4f699bf-1d1d-4b91-a447-3003b704fff6",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1424,
+        -656
+      ],
+      "id": "c4c8ad90-f6ea-47b8-8e70-299ea0151add",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9578ffb7-c71a-4547-9857-8f6c296d5d6d",
+              "name": "monthTab",
+              "value": "={{ DateTime.fromFormat($json.output.invoice_date, 'yyyy-MM-dd').toFormat('MMMyy').toUpperCase() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -848,
+        -656
+      ],
+      "id": "43c4dc27-6fcc-4ecf-8b95-9b0304e79b8c",
+      "name": "Compute Month Tab"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c57103a2-3214-4f2e-bc27-b3dd9da08b72",
+              "name": "Invoice Number",
+              "value": "={{ $('Compute Month Tab').item.json.output.invoice_number }}",
+              "type": "string"
+            },
+            {
+              "id": "f040ab11-98c4-4e91-bbb1-e556af39d5db",
+              "name": "Company Name",
+              "value": "={{ $('Compute Month Tab').item.json.output.company_name }}",
+              "type": "string"
+            },
+            {
+              "id": "444d6164-bc0c-4c54-a69e-b6ac14b89646",
+              "name": "Description",
+              "value": "={{ $('Compute Month Tab').item.json.output.description }}",
+              "type": "string"
+            },
+            {
+              "id": "720efa2a-679c-4663-a994-e7d040c8dff6",
+              "name": "Payee Account Number",
+              "value": "={{ $('Compute Month Tab').item.json.output.account_number }}",
+              "type": "string"
+            },
+            {
+              "id": "ae259b68-31d4-449b-84ec-4eae5f1614bc",
+              "name": "Payee Bank Name",
+              "value": "={{ $('Compute Month Tab').item.json.output.bank_name }}",
+              "type": "string"
+            },
+            {
+              "id": "c3a0f9ef-918c-4a0a-b226-8187c77fd8b6",
+              "name": "Biller Code",
+              "value": "={{ $('Compute Month Tab').item.json.output.biller_code }}",
+              "type": "string"
+            },
+            {
+              "id": "5be22b6c-40ff-4956-9e48-edd3165a02fa",
+              "name": "JomPay Ref",
+              "value": "={{ $('Compute Month Tab').item.json.output.jompay_ref }}",
+              "type": "string"
+            },
+            {
+              "id": "0e07cfdb-6964-4202-8e9b-dfc5392bf687",
+              "name": "Amount",
+              "value": "={{ $('Compute Month Tab').item.json.output.amount }}",
+              "type": "number"
+            },
+            {
+              "id": "fea7171f-cc8b-45a4-bdc5-c96f42b16f05",
+              "name": "Invoice Date",
+              "value": "={{ $('Compute Month Tab').item.json.output.invoice_date }}",
+              "type": "string"
+            },
+            {
+              "id": "a7758cc1-7fc5-4fd9-bcbb-06441ed9566f",
+              "name": "Due Date",
+              "value": "={{ $('Compute Month Tab').item.json.output.due_date }}",
+              "type": "string"
+            },
+            {
+              "id": "13f37f39-345f-495d-a2b2-61beb3d9ed1e",
+              "name": "Source File Link",
+              "value": "={{ $('Google Drive Trigger').item.json.description.split(' ||| ')[1] }}",
+              "type": "string"
+            },
+            {
+              "id": "93e498d6-f5b1-4da5-86cc-7817a4739bac",
+              "name": "Status",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "e5d3a698-b6ea-4e66-9367-9c83531cfd3d",
+              "name": "Email Subject",
+              "value": "={{ $('Google Drive Trigger').item.json.description.split(' ||| ')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "68714321-1c35-4e56-9ab4-3083b465f5b1",
+              "name": "File Hash",
+              "value": "={{ $('Google Drive Trigger').item.json.md5Checksum }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        -656
+      ],
+      "id": "43719abd-a9f2-4964-aab8-06a034996f7f",
+      "name": "Rename for Sheet"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a3358656-478a-4076-8b8a-44c8d75f637e",
+              "leftValue": "={{ $json.sheets.some(s => s.properties.title === $('Compute Month Tab').item.json.monthTab) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -400,
+        -656
+      ],
+      "id": "167c1922-fb17-4afb-954d-8688c0ee7a1b",
+      "name": "Tab Exists?"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_ID",
+          "mode": "id"
+        },
+        "title": "={{ $('Compute Month Tab').item.json.monthTab }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        -560
+      ],
+      "id": "18b9d9e2-a8a3-4811-a29b-aacd2e34a67a",
+      "name": "Create sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "07e79296-962d-428e-a113-f1e0be957ed1",
+              "name": "Invoice Number",
+              "value": "Invoice Number",
+              "type": "string"
+            },
+            {
+              "id": "9b7020da-0ee5-452c-9fa1-71a5f6985b02",
+              "name": "Company Name",
+              "value": "Company Name",
+              "type": "string"
+            },
+            {
+              "id": "5e3e75a0-77c3-4d00-aa2e-b8e1ecbd5fc6",
+              "name": "Description",
+              "value": "Description",
+              "type": "string"
+            },
+            {
+              "id": "47c014b3-492e-44ce-97de-e3865ae2615a",
+              "name": "Email Subject",
+              "value": "Email Subject",
+              "type": "string"
+            },
+            {
+              "id": "69500d4b-bbf2-48cd-9d99-c45f70b9bd47",
+              "name": "Payee Account Number",
+              "value": "Payee Account Number",
+              "type": "string"
+            },
+            {
+              "id": "8d8a8c76-6976-4292-90bf-064958d4839f",
+              "name": "Payee Bank Name",
+              "value": "Payee Bank Name",
+              "type": "string"
+            },
+            {
+              "id": "83f3499f-7e92-4af8-bc7c-d9c165bf219d",
+              "name": "Biller Code",
+              "value": "Biller Code",
+              "type": "string"
+            },
+            {
+              "id": "d8bb501c-83e6-46cb-8772-f101d59944d6",
+              "name": "JomPay Ref",
+              "value": "JomPay Ref",
+              "type": "string"
+            },
+            {
+              "id": "277d94f5-4033-4068-8cf4-0cb42a822c7a",
+              "name": "Amount",
+              "value": "Amount",
+              "type": "string"
+            },
+            {
+              "id": "89df1b40-2777-4783-9a81-aed92685a859",
+              "name": "Invoice Date",
+              "value": "Invoice Date",
+              "type": "string"
+            },
+            {
+              "id": "ce3bc59d-2c8b-4d1f-87f6-f5eeea00c8be",
+              "name": "Due Date",
+              "value": "Due Date",
+              "type": "string"
+            },
+            {
+              "id": "e9d44ec6-c14b-4fc4-a326-0f17d20b1101",
+              "name": "Status",
+              "value": "Status",
+              "type": "string"
+            },
+            {
+              "id": "ae914375-ab8a-4d9a-be08-1f0206957ca4",
+              "name": "Source File Link",
+              "value": "Source File Link",
+              "type": "string"
+            },
+            {
+              "id": "8f1138dc-ad56-4a1a-9d95-1830ffce2081",
+              "name": "File Hash",
+              "value": "File Hash",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        48,
+        -560
+      ],
+      "id": "22f16b4f-ef5a-4499-92ea-7987ba53d3f8",
+      "name": "Header Values"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Compute Month Tab').item.json.monthTab }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Subject",
+              "displayName": "Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payee Account Number",
+              "displayName": "Payee Account Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payee Bank Name",
+              "displayName": "Payee Bank Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Biller Code",
+              "displayName": "Biller Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "JomPay Ref",
+              "displayName": "JomPay Ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Key",
+              "displayName": "Invoice Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        -560
+      ],
+      "id": "5e3c7163-69c4-4551-b128-2281c6fe15e9",
+      "name": "Write Header",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Compute Month Tab').item.json.monthTab }}",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        496,
+        -560
+      ],
+      "id": "d018c12c-d002-480e-bc3a-4d305138a268",
+      "name": "Delete rows or columns from sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "invoice_number",
+              "description": "The invoice or document reference number, however it's labeled — commonly appears as 'Invoice Number', 'Invoice No.', 'Document No.', 'Bill No.', 'Reference No.', or similar. Extract whichever one appears."
+            },
+            {
+              "name": "company_name",
+              "description": "Name of the company/biller issuing the invoice"
+            },
+            {
+              "name": "description",
+              "description": "Short description of the invoice/service"
+            },
+            {
+              "name": "account_number",
+              "description": "Payee's bank account number, if present"
+            },
+            {
+              "name": "bank_name",
+              "description": "Payee's bank name, if present"
+            },
+            {
+              "name": "biller_code",
+              "description": "JomPay biller code, if present"
+            },
+            {
+              "name": "jompay_ref",
+              "description": "JomPay reference number, if present"
+            },
+            {
+              "name": "amount",
+              "type": "number",
+              "description": "Total amount due — numeric only, no currency symbol"
+            },
+            {
+              "name": "invoice_date",
+              "description": "The invoice date. Source dates may be numeric and ambiguous (e.g., \"07/08/2026\" could mean 7 August or July 8th depending on the format used). If either number in the date is greater than 12, that position must be the day (since months only go up to 12) — use this to determine the correct format. Always output in ISO format YYYY-MM-DD."
+            },
+            {
+              "name": "due_date",
+              "description": "The payment due date. Use the same date format interpretation as invoice_date — a single invoice should use one consistent format throughout, not mix conventions between its own dates. Note: on a typical invoice, the due date is usually on or after the invoice date, but this isn't a hard rule — an overdue/reminder notice can legitimately show a due date earlier than the notice's own date. Use this only as a loose sanity check, not a reason to override what the source text actually shows. Always output in ISO format YYYY-MM-DD."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a precise invoice data-extraction assistant. Extract exactly the fields defined in the schema. If a field isn't found in the text, return an empty string."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        -656
+      ],
+      "id": "7057ce31-da49-4483-be09-ae87deddc61d",
+      "name": "Information Extractor",
+      "retryOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Compute Month Tab').item.json.monthTab }}"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "=File Hash",
+              "lookupValue": "={{ $json['File Hash'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        944,
+        -656
+      ],
+      "id": "359c9e4c-8df8-4aa0-824e-42644413f74b",
+      "name": "Check Duplicate",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "23fa75f3-8d04-44c8-bbda-0e621b4efd80",
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1168,
+        -656
+      ],
+      "id": "78206ef6-607c-446d-9349-85afa0ab5544",
+      "name": "Duplicate Found?"
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/YOUR_GOOGLE_SHEETS_ID",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -624,
+        -656
+      ],
+      "id": "929552f0-bc96-4e4d-8b38-26e000d04173",
+      "name": "Get Spreadsheet Tabs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "=minimax/minimax-m3:free",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1136,
+        -432
+      ],
+      "id": "30d215db-883d-4395-8c2d-f8455dfb6a85",
+      "name": "LLM Chat Model (OpenRouter)",
+      "retryOnFail": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53bec9db-140c-413e-8612-ebf8b0d35f75",
+              "name": "Invoice Number",
+              "value": "={{ $('Rename for Sheet').item.json['Invoice Number'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2d6d223f-2c4c-4a1c-9a6d-692fbe8b52e8",
+              "name": "Company Name",
+              "value": "={{ $('Rename for Sheet').item.json['Company Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "15ea3ab0-716d-42d8-963b-27bd2d5641f3",
+              "name": "Description",
+              "value": "={{ $('Rename for Sheet').item.json.Description }}",
+              "type": "string"
+            },
+            {
+              "id": "5faba96d-e809-45ef-b239-1d6dd308b5fe",
+              "name": "Payee Account Number",
+              "value": "={{ $('Rename for Sheet').item.json['Payee Account Number'] }}",
+              "type": "string"
+            },
+            {
+              "id": "379dd802-9a52-4159-8f5c-ba39187e1144",
+              "name": "Payee Bank Name",
+              "value": "={{ $('Rename for Sheet').item.json['Payee Bank Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "0fbefa14-c48e-4b91-a929-f9c069f350f3",
+              "name": "Biller Code",
+              "value": "={{ $('Rename for Sheet').item.json['Biller Code'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d88e70e3-e48a-4b65-9dbe-5fd2dd0161d8",
+              "name": "JomPay Ref",
+              "value": "={{ $('Rename for Sheet').item.json['JomPay Ref'] }}",
+              "type": "string"
+            },
+            {
+              "id": "27b3c8d2-96dd-4906-9d08-d74ca64577b9",
+              "name": "Amount",
+              "value": "={{ $('Rename for Sheet').item.json.Amount }}",
+              "type": "number"
+            },
+            {
+              "id": "7fef722b-5365-4315-a02a-bf37ef265976",
+              "name": "Invoice Date",
+              "value": "={{ $('Rename for Sheet').item.json['Invoice Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "4ee5326c-55ba-4d52-968d-401916a024f1",
+              "name": "Due Date",
+              "value": "={{ $('Rename for Sheet').item.json['Due Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "44614b67-d9f2-4119-bb19-53f447dff763",
+              "name": "Source File Link",
+              "value": "={{ $('Rename for Sheet').item.json['Source File Link'] }}",
+              "type": "string"
+            },
+            {
+              "id": "25b5de05-6b82-415e-8339-a2f2d7103db3",
+              "name": "Status",
+              "value": "DUPLICATE - REVIEW",
+              "type": "string"
+            },
+            {
+              "id": "4a631063-7955-43ec-a0a3-c97773aa25a8",
+              "name": "Email Subject",
+              "value": "={{ $('Rename for Sheet').item.json['Email Subject'] }}",
+              "type": "string"
+            },
+            {
+              "id": "37a6999c-06e9-4f32-8cbf-ebf38e49c98b",
+              "name": "File Hash",
+              "value": "={{ $('Rename for Sheet').item.json['File Hash'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        -752
+      ],
+      "id": "aac86a5f-04b5-4e05-b2e6-fd7392c20008",
+      "name": "Mark as Duplicate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "53bec9db-140c-413e-8612-ebf8b0d35f75",
+              "name": "Invoice Number",
+              "value": "={{ $('Rename for Sheet').item.json['Invoice Number'] }}",
+              "type": "string"
+            },
+            {
+              "id": "2d6d223f-2c4c-4a1c-9a6d-692fbe8b52e8",
+              "name": "Company Name",
+              "value": "={{ $('Rename for Sheet').item.json['Company Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "15ea3ab0-716d-42d8-963b-27bd2d5641f3",
+              "name": "Description",
+              "value": "={{ $('Rename for Sheet').item.json.Description }}",
+              "type": "string"
+            },
+            {
+              "id": "5faba96d-e809-45ef-b239-1d6dd308b5fe",
+              "name": "Payee Account Number",
+              "value": "={{ $('Rename for Sheet').item.json['Payee Account Number'] }}",
+              "type": "string"
+            },
+            {
+              "id": "379dd802-9a52-4159-8f5c-ba39187e1144",
+              "name": "Payee Bank Name",
+              "value": "={{ $('Rename for Sheet').item.json['Payee Bank Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "0fbefa14-c48e-4b91-a929-f9c069f350f3",
+              "name": "Biller Code",
+              "value": "={{ $('Rename for Sheet').item.json['Biller Code'] }}",
+              "type": "string"
+            },
+            {
+              "id": "d88e70e3-e48a-4b65-9dbe-5fd2dd0161d8",
+              "name": "JomPay Ref",
+              "value": "={{ $('Rename for Sheet').item.json['JomPay Ref'] }}",
+              "type": "string"
+            },
+            {
+              "id": "27b3c8d2-96dd-4906-9d08-d74ca64577b9",
+              "name": "Amount",
+              "value": "={{ $('Rename for Sheet').item.json.Amount }}",
+              "type": "number"
+            },
+            {
+              "id": "7fef722b-5365-4315-a02a-bf37ef265976",
+              "name": "Invoice Date",
+              "value": "={{ $('Rename for Sheet').item.json['Invoice Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "4ee5326c-55ba-4d52-968d-401916a024f1",
+              "name": "Due Date",
+              "value": "={{ $('Rename for Sheet').item.json['Due Date'] }}",
+              "type": "string"
+            },
+            {
+              "id": "44614b67-d9f2-4119-bb19-53f447dff763",
+              "name": "Source File Link",
+              "value": "={{ $('Rename for Sheet').item.json['Source File Link'] }}",
+              "type": "string"
+            },
+            {
+              "id": "25b5de05-6b82-415e-8339-a2f2d7103db3",
+              "name": "Status",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "ead4bdad-6dbc-47bb-872a-63f23565e3ca",
+              "name": "Email Subject",
+              "value": "={{ $('Rename for Sheet').item.json['Email Subject'] }}",
+              "type": "string"
+            },
+            {
+              "id": "dd52d0a1-7cd8-4389-afdb-227ba4066fbd",
+              "name": "File Hash",
+              "value": "={{ $('Rename for Sheet').item.json['File Hash'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        -560
+      ],
+      "id": "489c2a61-83ff-45c4-bd42-bf65a063132e",
+      "name": "Mark as New"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEETS_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Compute Month Tab').item.json.monthTab }}"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "Invoice Key"
+          ],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Name",
+              "displayName": "Company Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Subject",
+              "displayName": "Email Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payee Account Number",
+              "displayName": "Payee Account Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payee Bank Name",
+              "displayName": "Payee Bank Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Biller Code",
+              "displayName": "Biller Code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "JomPay Ref",
+              "displayName": "JomPay Ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Source File Link",
+              "displayName": "Source File Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Invoice Key",
+              "displayName": "Invoice Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1616,
+        -560
+      ],
+      "id": "3659212f-3860-469d-8ddc-a4719f06de1e",
+      "name": "Append Row to Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### INVOICE TRACKER AUTOMATION\n\nAutomatically reads invoice PDFs as they arrive, extracts the key details using AI, and logs them into the monthly Google Sheet tracker — so invoices don't need to be entered by hand.\n\nFlow: Detect & Extract → Find/Create Sheet Tab → Prepare Row → Check for Duplicates → Write to Sheet",
+        "height": 288,
+        "width": 368,
+        "color": "#4D90FE"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2608,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "ff4436c2-377f-4711-997d-9914f75c6a15",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### DETECT & EXTRACT\n\nWatches for new invoice PDFs, downloads them, and uses AI to pull out the key fields (company, amount, dates, invoice number, etc.) from the document text.",
+        "height": 592,
+        "width": 1248
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2192,
+        -864
+      ],
+      "id": "a700d46e-1a90-473e-a1af-fa3f16f00ba7",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### FIND OR CREATE THE RIGHT SHEET TAB\n\nWorks out which month the invoice belongs to, checks if that month's tab already exists in the tracker, and creates it with headers if it doesn't.",
+        "height": 592,
+        "width": 1536
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        -864
+      ],
+      "typeVersion": 1,
+      "id": "297868ef-1ec0-4739-b7e7-e4418cac52e1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "### PREPARE THE ROW\n\nTakes the extracted data and formats it into the exact column\nnames the sheet expects.",
+        "height": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        640,
+        -864
+      ],
+      "id": "ae97d3b8-8129-42c4-bafc-ae7c548068c2",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### CHECK FOR DUPLICATES\n\nLooks up whether this exact file has already been processed\nbefore, and flags it if so.",
+        "height": 592,
+        "width": 624
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        896,
+        -864
+      ],
+      "id": "f96650ad-4ac8-4ff7-a680-20abea653965",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### WRITE TO THE SHEET\n\nAdds the finished row to the correct month's tab in the tracker.",
+        "height": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        -864
+      ],
+      "id": "25057a11-5f54-4093-b22a-2b8bac447077",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1872,
+        -528
+      ],
+      "id": "a7429eac-88bc-4017-a609-ec7ef8c9fcee",
+      "name": "Loop Over Items"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Month Tab": {
+      "main": [
+        [
+          {
+            "node": "Get Spreadsheet Tabs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename for Sheet": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tab Exists?": {
+      "main": [
+        [
+          {
+            "node": "Rename for Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet": {
+      "main": [
+        [
+          {
+            "node": "Header Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Header Values": {
+      "main": [
+        [
+          {
+            "node": "Write Header",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Header": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet": {
+      "main": [
+        [
+          {
+            "node": "Rename for Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Compute Month Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Duplicate Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Duplicate Found?": {
+      "main": [
+        [
+          {
+            "node": "Mark as Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark as New",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Spreadsheet Tabs": {
+      "main": [
+        [
+          {
+            "node": "Tab Exists?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Chat Model (OpenRouter)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Append Row to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as New": {
+      "main": [
+        [
+          {
+            "node": "Append Row to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append Row to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "YOUR_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "id": "YOUR_WORKFLOW_ID",
+  "tags": []
+}
